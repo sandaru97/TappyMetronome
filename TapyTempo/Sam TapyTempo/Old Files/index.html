@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BPM Calculator with Metronome</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .container {
+      position: relative;
+      text-align: center;
+    }
+
+    .center-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      padding: 40px 60px;
+      font-size: 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #bpmDisplay, #averageBpmDisplay {
+      margin-top: 20px;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .metronome-btn {
+      margin-top: 20px;
+      background-color: #FF5733;
+    }
+
+    #visualMetronome {
+      width: 100px;
+      height: 100px;
+      margin-top: 20px;
+      border-radius: 50%;
+      background-color: red;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
+
+    .flashing {
+      opacity: 1;
+    }
+
+    #bpmSlider {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(270deg);
+      width: 80%;
+      max-width: 200px;
+    }
+
+    #sliderValue {
+      font-size: 20px;
+      position: absolute;
+      top: 75%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Beats Per Minute Calculator with Metronome</h1>
+    <p>Tap the button to calculate BPM</p>
+
+    <!-- Outer container for Tap Me button and slider -->
+    <div class="center-container">
+      <button id="bpmButton">Tap Me</button>
+
+      <!-- Slider for BPM -->
+      <input type="range" id="bpmSlider" min="40" max="240" value="120" step="1">
+    </div>
+
+    <p id="bpmDisplay">BPM: 0</p>
+    <p id="averageBpmDisplay">Average BPM: 0</p>
+
+    <button id="metronomeButton" class="metronome-btn">Start Metronome</button>
+    <button id="resetButton" class="metronome-btn">Reset</button>
+
+    <!-- Add an audio element for tap sound -->
+    <audio id="tapSound" src="beep.wav" preload="auto"></audio>
+
+    <!-- Metronome Sound (beep.wav) -->
+    <audio id="metronomeSound" src="beep.wav" preload="auto"></audio>
+
+    <!-- Visual Metronome Indicator -->
+    <div id="visualMetronome"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let taps = [];
+      let totalBpm = 0;
+      let bpmCount = 0;
+      let metronomeInterval;
+      const bpmButton = document.getElementById('bpmButton');
+      const bpmDisplay = document.getElementById('bpmDisplay');
+      const averageBpmDisplay = document.getElementById('averageBpmDisplay');
+      const metronomeButton = document.getElementById('metronomeButton');
+      const resetButton = document.getElementById('resetButton');
+      const tapSound = document.getElementById('tapSound');
+      const metronomeSound = document.getElementById('metronomeSound');
+      const visualMetronome = document.getElementById('visualMetronome');
+      const bpmSlider = document.getElementById('bpmSlider');
+      const sliderValue = document.getElementById('sliderValue');
+
+      bpmSlider.addEventListener('input', () => {
+        const bpm = bpmSlider.value;
+        sliderValue.textContent = `Current BPM: ${bpm}`;
+        bpmDisplay.textContent = `BPM: ${bpm}`;
+
+        // Update the metronome interval if it's running
+        if (metronomeInterval) {
+          const intervalTime = 60000 / bpm;
+          clearInterval(metronomeInterval);
+          metronomeInterval = setInterval(() => {
+            metronomeSound.play().catch(error => {
+              console.error("Error playing metronome sound: ", error);
+            });
+
+            // Flash the visual metronome indicator
+            visualMetronome.classList.add('flashing');
+            setTimeout(() => {
+              visualMetronome.classList.remove('flashing');
+            }, 100); // Flash duration in milliseconds
+          }, intervalTime);
+        }
+      });
+
+      bpmButton.addEventListener('click', () => {
+        const currentTime = Date.now();
+
+        // Play sound feedback on tap
+        tapSound.play().catch(error => {
+          console.error("Error playing sound: ", error);
+        });
+
+        // Record the time of the tap
+        taps.push(currentTime);
+
+        if (taps.length > 1) {
+          // Calculate the time difference between the last two taps
+          const timeDifference = (currentTime - taps[taps.length - 2]) / 1000; // in seconds
+          const bpm = Math.round(60 / timeDifference); // BPM = 60 / time between taps in seconds
+
+          // Display the current BPM
+          bpmDisplay.textContent = `BPM: ${bpm}`;
+
+          // Update total BPM and increment count for average calculation
+          totalBpm += bpm;
+          bpmCount++;
+
+          // Calculate and display the average BPM
+          const averageBpm = Math.round(totalBpm / bpmCount);
+          averageBpmDisplay.textContent = `Average BPM: ${averageBpm}`;
+
+          // Update the slider to match the new BPM
+          bpmSlider.value = bpm;
+          sliderValue.textContent = `Current BPM: ${bpm}`;
+        }
+      });
+
+      // Metronome functionality
+      metronomeButton.addEventListener('click', () => {
+        if (metronomeInterval) {
+          // Stop the metronome if it's already running
+          clearInterval(metronomeInterval);
+          metronomeButton.textContent = "Start Metronome";
+          metronomeInterval = null;
+        } else {
+          // Start the metronome if it's not running
+          const bpm = parseInt(bpmDisplay.textContent.replace("BPM: ", ""));
+          if (bpm === 0) {
+            alert("Please tap to set a BPM first.");
+            return;
+          }
+
+          // Calculate the interval time between beats in milliseconds
+          const intervalTime = 60000 / bpm;
+
+          // Start the metronome
+          metronomeInterval = setInterval(() => {
+            metronomeSound.play().catch(error => {
+              console.error("Error playing metronome sound: ", error);
+            });
+
+            // Flash the visual metronome indicator
+            visualMetronome.classList.add('flashing');
+            setTimeout(() => {
+              visualMetronome.classList.remove('flashing');
+            }, 100); // Flash duration in milliseconds
+          }, intervalTime);
+
+          metronomeButton.textContent = "Stop Metronome";
+        }
+      });
+
+      // Reset functionality
+      resetButton.addEventListener('click', () => {
+        // Clear stored taps
+        taps = [];
+        totalBpm = 0;
+        bpmCount = 0;
+
+        // Reset BPM and average BPM displays
+        bpmDisplay.textContent = "BPM: 0";
+        averageBpmDisplay.textContent = "Average BPM: 0";
+
+        // Reset slider
+        bpmSlider.value = 120;
+        sliderValue.textContent = "Current BPM: 120";
+
+        // Stop the metronome if it's running
+        if (metronomeInterval) {
+          clearInterval(metronomeInterval);
+          metronomeButton.textContent = "Start Metronome";
+          metronomeInterval = null;
+        }
+
+        // Reset visual metronome
+        visualMetronome.classList.remove('flashing');
+      });
+    });
+  </script>
+</body>
+</html>

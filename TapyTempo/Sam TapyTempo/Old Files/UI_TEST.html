@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BPM UI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #FFF; /* White background */
+      color: #333; /* Black text color */
+    }
+
+    .container {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .bpm-title p {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px; /* Space between title and circle */
+      color: #333; /* Black color for text */
+    }
+
+    /* Big Circle */
+    .circle {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background-color: #FFBEBE; /* Soft pinkish color */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+    }
+
+    .circle p {
+      color: #333; /* Black color for text inside circle */
+      font-size: 18px;
+    }
+
+    .average-bpm p {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333; /* Black color for average BPM text */
+    }
+
+    .slider-container {
+      margin-top: 20px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      max-width: 400px;
+      background-color: #FFF;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      height: 10px;
+      outline: none;
+    }
+
+    /* Slider Thumb Color - Melon (#FF6F61) */
+    input[type="range"]::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      background-color: #FF6F61; /* Melon color */
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* Slider Track Color */
+    input[type="range"]::-webkit-slider-runnable-track {
+      background-color: #F2F2F2; /* Light gray track */
+    }
+
+    .buttons-container {
+      margin-top: 30px;
+    }
+
+    .circle-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #FFBEBE; /* Soft pinkish color */
+      color: #333; /* Black color for text */
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 0 20px;
+      transition: background-color 0.3s;
+    }
+
+    .circle-btn:hover {
+      background-color: #FF9B9B; /* Slightly darker pink for hover effect */
+    }
+
+    /* Additional styles for better layout on small screens */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      input[type="range"] {
+        max-width: 100%;
+      }
+
+      .circle-btn {
+        width: 60px;
+        height: 60px;
+      }
+    }
+    /* Reset all styles for the slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Slider track style */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: #ddd; /* Default track color */
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: #ddd;
+}
+
+input[type="range"]::-ms-track {
+  width: 100%;
+  height: 8px;
+  background: #ddd;
+  border-color: transparent;
+  border-width: 8px 0;
+  color: transparent;
+  /* Required for MS browsers */
+  background-color: #ddd;
+}
+
+/* Slider thumb (dot) style */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background-color: #FFBEBE; /* Melon color */
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background-color: #FFBEBE; /* Melon color */
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+input[type="range"]::-ms-thumb {
+  width: 20px;
+  height: 20px;
+  background-color: #FFBEBE; /* Melon color */
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- BPM Title -->
+    <div class="bpm-title">
+      <p>BPM : <span id="bpmValue">100</span></p>
+    </div>
+
+    <!-- Big Circle -->
+    <div class="circle">
+      <p>BPM</p>
+    </div>
+
+    <!-- Average BPM Text -->
+    <div class="average-bpm">
+      <p>Average BPM: <span id="averageBPM">xxx</span></p>
+    </div>
+
+    <!-- Slider -->
+    <div class="slider-container">
+      <input type="range" id="bpmSlider" min="60" max="200" value="100">
+    </div>
+
+    <!-- Circle Buttons -->
+    <div class="buttons-container">
+      <button class="circle-btn" id="startBtn">Start</button>
+      <button class="circle-btn" id="stopBtn">Stop</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const bpmSlider = document.getElementById("bpmSlider");
+      const bpmValue = document.getElementById("bpmValue");
+      const averageBPM = document.getElementById("averageBPM");
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+
+      let totalBPM = 0;
+      let count = 0;
+
+      // Update BPM value when slider changes
+      bpmSlider.addEventListener("input", (event) => {
+        bpmValue.textContent = event.target.value;
+      });
+
+      // Handle start button click
+      startBtn.addEventListener("click", () => {
+        const bpm = parseInt(bpmValue.textContent);
+        totalBPM += bpm;
+        count++;
+        const avgBPM = totalBPM / count;
+        averageBPM.textContent = avgBPM.toFixed(2);
+      });
+
+      // Handle stop button click
+      stopBtn.addEventListener("click", () => {
+        // You can add functionality to stop something here, if necessary.
+        console.log("Stopped");
+      });
+    });
+  </script>
+</body>
+</html>

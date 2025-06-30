@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BPM UI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #FAF3E0;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+    }
+
+    .bpm-title p {
+      font-size: 40px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .circle {
+      width: 400px;
+      height: 300px;
+      border-radius: 50%;
+      background-color: #FFBEBE;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .average-bpm p {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    /* Create the radial slider track */
+    .slider-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background-color: transparent;
+      border: 10px solid #ddd; /* Track color */;
+      clip-path: inset(0 0 20% 0); /* Clip the bottom 20% */
+
+    }
+
+    .slider-thumb {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background-color: #FF6F61;
+      border-radius: 50%;
+      cursor: pointer;
+      transform-origin: 50% 150px; /* The thumb will rotate around the center */
+      transition: transform 0.1s ease;
+    }
+
+    .buttons-container {
+      margin-top: 30px;
+    }
+
+    .circle-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #FFBEBE;
+      color: #333;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 0 10px;
+      transition: background-color 0.3s;
+border:4px solid #000;
+    }
+
+    .circle-btn:hover {
+      background-color: #FF9B9B;
+    }
+
+    /* Media query for smaller screens */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      .circle-btn {
+        width: 60px;
+        height: 60px;
+      }
+    }
+/* Create the radial slider track */
+.slider-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: 10px solid #000; /* Track color */
+  clip-path: inset(0 0 20% 0); /* Clip the bottom 20% */
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="bpm-title">
+      <p>BPM : <span id="bpmValue">100</span></p>
+    </div>
+
+    <div class="circle">
+      <img src="pose1tapme.gif" alt="Pose Image">
+      <div class="slider-container">
+        <div class="slider-thumb" id="sliderThumb"></div>
+      </div>
+    </div>
+
+    <div class="average-bpm">
+      <p>Average BPM: <span id="averageBPM">xxx</span></p>
+    </div>
+
+    <div class="buttons-container">
+      <button class="circle-btn" id="startBtn">
+        <img src="metronome.png" width="40px" height="40px">
+      </button>
+      <button class="circle-btn" id="stopBtn">
+        <img src="reset.png" width="40px" height="40px">
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const bpmValue = document.getElementById("bpmValue");
+      const averageBPM = document.getElementById("averageBPM");
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const sliderThumb = document.getElementById("sliderThumb");
+
+      let totalBPM = 0;
+      let count = 0;
+      let currentBPM = 100;
+
+      // Handle slider movement
+      const updateSliderPosition = (value) => {
+        const angle = (value - 60) * (360 / 140); // Maps the value (60 to 200) to a 360-degree range
+        sliderThumb.style.transform = `rotate(${angle}deg)`;
+      };
+
+      // Set initial slider position
+      updateSliderPosition(currentBPM);
+
+      // Handle start button click
+      startBtn.addEventListener("click", () => {
+        const bpm = parseInt(bpmValue.textContent);
+        totalBPM += bpm;
+        count++;
+        const avgBPM = totalBPM / count;
+        averageBPM.textContent = avgBPM.toFixed(2);
+      });
+
+      // Handle stop button click
+      stopBtn.addEventListener("click", () => {
+        console.log("Stopped");
+      });
+
+      // Add event listener for thumb drag
+      let isDragging = false;
+
+      sliderThumb.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        const offsetX = e.clientX - sliderThumb.getBoundingClientRect().left;
+        document.addEventListener("mousemove", (e) => {
+          if (isDragging) {
+            const centerX = window.innerWidth / 2;
+            const deltaX = e.clientX - centerX;
+            let value = Math.round(deltaX / 2); // Convert mouse distance to BPM value
+            bpmValue.textContent = Math.min(200, Math.max(60, 100 + value));
+            updateSliderPosition(bpmValue.textContent);
+          }
+        });
+
+        document.addEventListener("mouseup", () => {
+          isDragging = false;
+        });
+      });
+    });
+  </script>
+</body>
+</html>

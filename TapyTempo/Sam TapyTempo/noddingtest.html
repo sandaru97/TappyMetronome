@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dance to the Beat with 2 Local Images</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            transform: scale(1);
+            transform-origin: center center;
+
+        }
+
+        .container {
+            position: relative;
+            height: 300px;
+            width: 300px;
+        }
+
+        .character {
+            width: 80px;  /* Adjust the size of the image */
+            height: auto;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: dance 1s infinite alternate;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            color: white;
+            border-radius: 5px;
+        }
+
+        @keyframes dance {
+            0% {
+                content: url('Pose2Final.png'); /* Path to your first image */
+            }
+            100% {
+                content: url('Pose1Final.png'); /* Path to your second image */
+            }
+        }
+        @media screen and (max-width: 320px) {
+      body {
+        width: 100vw;  /* Fit width to 100% of the screen */
+        height: auto;
+        transform: scale(0.5);  /* Scale down content to fit */
+      }
+    }
+
+    /* Scale to fit screen height */
+    @media screen and (max-height: 568px) {
+      body {
+        width: auto;
+        height: 100vh;  /* Fit height to 100% of the screen */
+        transform: scale(0.5);  /* Scale down content to fit */
+      }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Image of the dancing character -->
+        <img class="character" id="character" alt="Dancing Character">
+    </div>
+
+    <div class="controls">
+        <label for="bpm">BPM: </label>
+        <input type="number" id="bpm" value="120" min="30" max="300">
+    </div>
+
+    <script>
+        const bpmInput = document.getElementById('bpm');
+        const character = document.getElementById('character');
+
+        // Function to calculate the duration of the animation based on BPM
+        function calculateAnimationDuration(bpm) {
+            const secondsPerBeat = 60 / bpm;
+            return secondsPerBeat * 0.5; // Half a second for the dance move
+        }
+
+        // Function to update the dance animation speed
+        function updateAnimationSpeed() {
+            const bpm = bpmInput.value;
+            const duration = calculateAnimationDuration(bpm);
+            character.style.animationDuration = `${duration}s`;
+        }
+
+        // Listen for changes in the BPM input
+        bpmInput.addEventListener('input', updateAnimationSpeed);
+
+        // Initialize the animation speed
+        updateAnimationSpeed();
+    </script>
+</body>
+</html>
